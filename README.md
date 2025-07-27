@@ -1,6 +1,8 @@
 # Metrônomo Web
 
 Um metrônomo web construído com JavaScript puro e Web Audio API, projetado para auxiliar nos estudos de bateria e para aprimorar minhas habilidades de programação.
+<img width="1920" height="919" alt="image" src="https://github.com/user-attachments/assets/a84cd5bf-82f7-44b6-877f-69fe3131c76a" />
+
 
 ---
 
