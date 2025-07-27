@@ -28,6 +28,7 @@ Um metrônomo web construído com JavaScript puro e Web Audio API, projetado par
 * **JavaScript (ES6+)**
 * **Web Audio API** (para baixa latência e controle preciso do áudio)
 * **Node.js + npm** (para o ambiente de desenvolvimento local)
+* Google Gemini
 
 ---
 
