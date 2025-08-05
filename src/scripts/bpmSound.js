@@ -36,8 +36,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Elementos do DOM ---
     const startButton = document.getElementById('startButton');
     const stopButton = document.getElementById('stopButton');
+    const beatVisualizer = document.getElementById('beatVisualizer');
     const bpmInput = document.getElementById('bpmInput');
     const bpmSlider = document.getElementById('bpmSlider');
+    const tapButton = document.getElementById('tapButton');
+    const compassSelect = document.getElementById('compassSelect');
     const subdivisionSelect = document.getElementById('subdivisionSelect');
     const accentCheckbox = document.getElementById('accentCheckbox');
     const accentVolumeSlider = document.getElementById('accentVolume');
@@ -55,7 +58,22 @@ document.addEventListener('DOMContentLoaded', function() {
     bpmInput.addEventListener('input', function() { bpmSlider.value = this.value; });
     startButton.addEventListener('click', startMetronome);
     stopButton.addEventListener('click', stopMetronome);
-
+    window.addEventListener('keydown', function(event) {
+        if (event.key === ' ' || event.key === 'Enter') {
+            if (isPlaying) {
+                stopMetronome();
+            } else {
+                startMetronome();
+            }
+        }
+        if (event.key === 'ArrowUp' || event.key === 'w') {
+            bpmInput.value = Math.min(parseInt(bpmInput.value, 10) + 1, parseInt(bpmInput.max, 10));
+            bpmSlider.value = bpmInput.value;
+        } else if (event.key === 'ArrowDown' || event.key === 's') {
+            bpmInput.value = Math.max(parseInt(bpmInput.value, 10) - 1, parseInt(bpmInput.min, 10));
+            bpmSlider.value = bpmInput.value;
+        }
+    });
     bpmInput.addEventListener('blur', function() {
         const min = parseInt(this.min, 10);
         const max = parseInt(this.max, 10);
@@ -100,6 +118,52 @@ document.addEventListener('DOMContentLoaded', function() {
         mixerArrow.style.transform = volumeControls.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
     });
 
+    let tapTimeStamps = [];
+    const tapTimeOut = 2000;
+    tapButton.addEventListener('click', function() {
+        console.log("Tap detected");
+        const now = performance.now();
+
+        if (tapTimeStamps.length > 0){
+            const lastTapTime = tapTimeStamps[tapTimeStamps.length - 1];
+            if ((now - lastTapTime) > tapTimeOut) {
+                tapTimeStamps = [];
+            }
+        }
+
+        tapTimeStamps.push(now);
+        if (tapTimeStamps.length > 5) {
+            tapTimeStamps = tapTimeStamps.slice(-5);
+        }
+
+        if (tapTimeStamps.length > 1) {
+            const intervals = [];
+            for (let i = 1; i < tapTimeStamps.length; i++) {
+                intervals.push(tapTimeStamps[i] - tapTimeStamps[i - 1]);
+            }
+            
+            const averageInterval = intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length;
+
+            if (averageInterval > 0) {
+                let bpm = Math.round(60000 / averageInterval);
+                
+                
+                const min = parseInt(bpmInput.min, 10);
+                const max = parseInt(bpmInput.max, 10);
+                if (bpm < min) bpm = min;
+                if (bpm > max) bpm = max;
+
+                bpmInput.value = bpm;
+                bpmSlider.value = bpm;
+            }
+        }
+    });
+
+    compassSelect.addEventListener('change', function() {
+        const beats = parseInt(this.value.split('/')[0], 10);
+        updateBeatVisualizer(beats);
+    });
+
     // FUNÇÃO DE AGENDAMENTO
     function scheduleNote(beatInMeasure, subdivisionInBeat, time) {
         let bufferToPlay;
@@ -107,6 +171,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // É a primeira nota da batida (o pulso principal)?
         if (subdivisionInBeat === 1) {
+            const delay = (time - audioContext.currentTime) * 1000;
+            setTimeout(() => {
+                document.querySelectorAll('circle[data-beat-index]').forEach(circle => {
+                    circle.classList.remove('fill-cyan-500'); 
+                    circle.classList.add('fill-gray-600');    
+                });
+                const activeCircle = beatVisualizer.querySelector(`circle[data-beat-index="${beatInMeasure}"]`);
+                if (activeCircle) {
+                     activeCircle.classList.remove('fill-gray-600');
+                    activeCircle.classList.add('fill-cyan-500');    
+                }
+            }, delay);
             if (accentCheckbox.checked && beatInMeasure === 1) {
                 bufferToPlay = (beatInMeasure === 1) ? accentBuffer : normalBuffer;
                 gainNodeToUse = accentGainNode;
@@ -128,6 +204,18 @@ document.addEventListener('DOMContentLoaded', function() {
         source.start(time);
     }
     
+    function updateBeatVisualizer(beatPerMeasure){
+        beatVisualizer.innerHTML = ''; // Limpa o visualizador
+        for (let i = 0; i < beatPerMeasure; i++) {
+            const circleSvg = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-8">
+                    <circle cx="12" cy="12" r="10" class="fill-gray-600 transition-colors duration-100" data-beat-index="${i + 1}" />
+                </svg>
+            `;
+            beatVisualizer.innerHTML += circleSvg;
+        }
+    }
+
     // --- Variáveis de estado da batida ---
     let currentBeatInMeasure;
     let currentSubdivisionInBeat;
@@ -147,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
             currentSubdivisionInBeat = 1;
             // Quando a subdivisão "zera", incrementamos a batida principal
             currentBeatInMeasure++;
-            if (currentBeatInMeasure > 4) {
+            if (currentBeatInMeasure > parseInt(compassSelect.value.split('/')[0], 10)) {
                 currentBeatInMeasure = 1;
             }
         }

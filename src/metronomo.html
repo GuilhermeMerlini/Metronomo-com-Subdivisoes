@@ -11,7 +11,7 @@
         input[type=number] { -moz-appearance: textfield; appearance: textfield; }
         #volumeControls {transition: all 0.3s ease-in-out;}
     </style>
-    <script src="scripts/bpmSound.js"></script>
+    <script type="module" src="scripts/main.js"></script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen font-sans text-gray-800 dark:text-gray-300 transition-colors duration-300">
     <div class="absolute top-4 left-4 flex items-center space-x-4">
@@ -21,16 +21,33 @@
             </svg>
         </a>
     </div>
-    <div class="max-w-xl bg-gray-800 rounded-2xl shadow-2xl p-6 space-y-8">
+
+    <div class="max-w-xl bg-gray-800 rounded-2xl outline-2 outline-sky-900 shadow-2xl p-6 space-y-8">
+        <div id="beatVisualizer" class="flex items-center justify-center mb-4">
+        </div>
+        
         <div class="text-center">
             <label for="bpmInput" class="text-sm font-medium text-gray-400">BPM</label>
             <input class="text-center text-7xl font-bold bg-transparent w-full focus:outline-none" type="number" id="bpmInput" value="120" min="30" max="300">
             <input class="mt-2 w-full h-2 bg-gray-900 rounded-lg appearance-none cursor-pointer" type="range" min="30" max="300" value="120" id="bpmSlider">
+            <button id="tapButton" class="mt-4 w-xs py-2 bg-cyan-500 hover:bg-cyan-600 rounded-lg transition-colors font-bold cursor-pointer">TAP</button>
         </div>
-
+        
         <hr class="border-gray-700">
 
         <div class="flex items-center justify-around">
+            <div>
+                <label for="compassSelect" class="ml-4 font-medium">Compasso</label>
+                <select id="compassSelect" class="bg-gray-700 border-gray-600 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                    <option value="2/4">2/4</option>
+                    <option value="3/4">3/4</option>
+                    <option value="4/4" selected>4/4</option>
+                    <option value="5/4">5/4</option>
+                    <option value="6/8">6/8</option>
+                    <option value="7/8">7/8</option>
+                    <option value="9/8">9/8</option>
+                </select>
+            </div>
             <div class="flex items-center space-x-3">
                 <label for="subdivisionSelect" class="font-medium">Subdivisões</label>
                 <select id="subdivisionSelect" class="bg-gray-700 border-gray-600 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-cyan-500">
@@ -47,7 +64,6 @@
             <div class="flex items-center space-x-2">
                 <label for="accentCheckbox" class="ml-4 font-medium">Acentuar primeira nota</label>
                 <input type="checkbox" id="accentCheckbox" checked class="w-5 h-5 text-cyan-600 bg-gray-700 border-gray-600 rounded focus:ring-cyan-500">
-                
             </div>
         </div>
 
@@ -80,47 +96,9 @@
         </div>
         
         <div class="flex items-center space-x-4 pt-2">
-            <button id="startButton" class="w-full bg-cyan-600 text-white px-4 py-3 rounded-lg font-bold focus:outline-2 focus:outline-offset-2 focus:outline-cyan-500 hover:bg-cyan-500 transition-colors">INICIAR</button>
+            <button id="startButton" class="w-full bg-sky-700 text-white px-4 py-3 rounded-lg font-bold focus:outline-2 focus:outline-offset-2 focus:outline-sky-600 hover:bg-sky-600 transition-colors">INICIAR</button>
             <button id="stopButton" class="w-full bg-gray-700 text-gray-300 px-4 py-3 rounded-lg font-bold focus:outline-2 focus:outline-offset-2 focus:outline-gray-600 hover:bg-gray-600 transition-colors">PARAR</button>
         </div>
     </div>
-    <script>
-        // Ícones do botão
-        var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
-        var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
-
-        // Função para aplicar o tema
-        function applyTheme(theme) {
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
-                themeToggleLightIcon.classList.remove('hidden');
-                themeToggleDarkIcon.classList.add('hidden');
-            } else {
-                document.documentElement.classList.remove('dark');
-                themeToggleDarkIcon.classList.remove('hidden');
-                themeToggleLightIcon.classList.add('hidden');
-            }
-        }
-
-        // Verifica o tema salvo no localStorage ou a preferência do sistema
-        var savedTheme = localStorage.getItem('theme');
-        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-        if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
-            applyTheme('dark');
-        } else {
-            applyTheme('light');
-        }
-
-        // Listener para o clique no botão
-        var themeToggleButton = document.getElementById('theme-toggle');
-        themeToggleButton.addEventListener('click', function() {
-            var currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-            var newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            localStorage.setItem('theme', newTheme);
-            applyTheme(newTheme);
-        });
-    </script>
 </body>
 </html>
