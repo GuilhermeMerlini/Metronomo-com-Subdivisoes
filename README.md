@@ -12,6 +12,10 @@ Um metrônomo web construído com JavaScript puro e Web Audio API, projetado par
 * **Subdivisões Complexas:** Suporte para subdivisões rítmicas comuns e complexas:
     * Figuras de tempo (semínima, colcheia, semicolcheia, fusa).
     * Quiálteras para estudos de polirritmia (tercinas, quintinas, sextinas e septinas).
+* **Compassos:**
+     * Permite mudar o compasso para 2/4, 3/4, ..., até 9/8
+* **Botão de Tap:**
+     * Botão para configurar a velocidade de acordo com os cliques
 * **Mixer de Volume Individual:** Controle independente do volume para cada tipo de batida:
     * **Acento:** O primeiro tempo do compasso.
     * **Batida:** Os demais tempos do compasso.
